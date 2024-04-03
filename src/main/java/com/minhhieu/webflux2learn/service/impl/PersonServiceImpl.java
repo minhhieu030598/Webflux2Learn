@@ -5,8 +5,9 @@ import com.minhhieu.webflux2learn.model.Person;
 import com.minhhieu.webflux2learn.model.filter.PersonFilter;
 import com.minhhieu.webflux2learn.model.request.CreatePersonRequest;
 import com.minhhieu.webflux2learn.model.response.PersonResponse;
+import com.minhhieu.webflux2learn.notifier.PersonNotifier;
 import com.minhhieu.webflux2learn.repository.PersonRepository;
-import com.minhhieu.webflux2learn.service.PersonService;
+import com.minhhieu.webflux2learn.service.internal.PersonServiceInternal;
 import com.minhhieu.webflux2learn.util.Filters;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
@@ -20,13 +21,15 @@ import java.time.OffsetDateTime;
 
 @Service
 @Log4j2
-public class PersonServiceImpl implements PersonService {
+public class PersonServiceImpl implements PersonServiceInternal {
     private final PersonMapper personMapper;
     private final PersonRepository personRepository;
+    private final PersonNotifier personNotifier;
 
-    public PersonServiceImpl(PersonRepository personRepository, PersonMapper personMapper) {
+    public PersonServiceImpl(PersonRepository personRepository, PersonMapper personMapper, PersonNotifier personNotifier) {
         this.personRepository = personRepository;
         this.personMapper = personMapper;
+        this.personNotifier = personNotifier;
     }
 
     public Mono<Page<PersonResponse>> getPersons(PersonFilter filter, Pageable pageable) {

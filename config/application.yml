@@ -24,6 +24,25 @@ spring:
     url: "r2dbc:postgresql://localhost:5432/happy_learn?stringtype=unspecified"
     username: postgres
     password: iloveyou
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+#      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+    consumer:
+#      bootstrap-servers: localhost:9092
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.LongDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+#      group-id: my-reactive-group
+
+kafka:
+  topic:
+    sync-person: dev.management.person
+  group:
+    sync-person: dev.management
+
 
 person-manager:
   http:
