@@ -21,6 +21,7 @@
         <lombok.version>1.18.30</lombok.version>
         <hibernate-validator.version>8.0.1.Final</hibernate-validator.version>
         <projectreactor.version>3.6.4</projectreactor.version>
+        <hazelcast.version>5.3.6</hazelcast.version>
     </properties>
 
     <dependencies>
@@ -47,7 +48,11 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-web</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-spring</artifactId>
+            <version>${hazelcast.version}</version> <!-- Use the latest version -->
+        </dependency>
         <dependency>
             <groupId>org.hibernate.validator</groupId>
             <artifactId>hibernate-validator</artifactId>

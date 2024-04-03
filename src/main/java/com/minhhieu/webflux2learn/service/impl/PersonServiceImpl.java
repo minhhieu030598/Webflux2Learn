@@ -1,5 +1,7 @@
 package com.minhhieu.webflux2learn.service.impl;
 
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.map.IMap;
 import com.minhhieu.webflux2learn.mapper.PersonMapper;
 import com.minhhieu.webflux2learn.model.Person;
 import com.minhhieu.webflux2learn.model.filter.PersonFilter;
@@ -17,19 +19,24 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.time.OffsetDateTime;
+import java.util.concurrent.TimeUnit;
 
 
 @Service
 @Log4j2
 public class PersonServiceImpl implements PersonServiceInternal {
+    private static final String PERSON_CACHE_NAME_SPACE = "PERSON_CACHE_NAME_SPACE";
     private final PersonMapper personMapper;
     private final PersonRepository personRepository;
     private final PersonNotifier personNotifier;
+    private final IMap<Long, Person> personCache;
 
-    public PersonServiceImpl(PersonRepository personRepository, PersonMapper personMapper, PersonNotifier personNotifier) {
+    public PersonServiceImpl(HazelcastInstance hazelcastInstance,
+                             PersonRepository personRepository, PersonMapper personMapper, PersonNotifier personNotifier) {
         this.personRepository = personRepository;
         this.personMapper = personMapper;
         this.personNotifier = personNotifier;
+        this.personCache = hazelcastInstance.getMap(PERSON_CACHE_NAME_SPACE);
     }
 
     public Mono<Page<PersonResponse>> getPersons(PersonFilter filter, Pageable pageable) {
@@ -54,6 +61,14 @@ public class PersonServiceImpl implements PersonServiceInternal {
                 .map(id -> personMapper.map(id, request, OffsetDateTime.now()))
                 .flatMap(personRepository::insert)
                 .then();
+    }
+
+    Mono<Person> getPersonInCache(Long id) {
+        return Mono.justOrEmpty(personCache.get(id));
+    }
+
+    Mono<Person> putPersonToCache(Person person) {
+        return Mono.justOrEmpty(personCache.put(person.getId(), person, 6000, TimeUnit.MILLISECONDS));
     }
 
 
