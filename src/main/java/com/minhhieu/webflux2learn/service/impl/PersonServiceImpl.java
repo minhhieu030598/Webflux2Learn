@@ -2,20 +2,24 @@ package com.minhhieu.webflux2learn.service.impl;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
+import com.minhhieu.webflux2learn.exception.BusinessException;
 import com.minhhieu.webflux2learn.mapper.PersonMapper;
 import com.minhhieu.webflux2learn.model.Person;
 import com.minhhieu.webflux2learn.model.filter.PersonFilter;
 import com.minhhieu.webflux2learn.model.request.CreatePersonRequest;
+import com.minhhieu.webflux2learn.model.request.UpdatePersonRequest;
 import com.minhhieu.webflux2learn.model.response.PersonResponse;
 import com.minhhieu.webflux2learn.notifier.PersonNotifier;
 import com.minhhieu.webflux2learn.repository.PersonRepository;
 import com.minhhieu.webflux2learn.service.internal.PersonServiceInternal;
+import com.minhhieu.webflux2learn.util.ErrorCode;
 import com.minhhieu.webflux2learn.util.Filters;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.time.OffsetDateTime;
@@ -60,6 +64,20 @@ public class PersonServiceImpl implements PersonServiceInternal {
         return personRepository.nextId()
                 .map(id -> personMapper.map(id, request, OffsetDateTime.now()))
                 .flatMap(personRepository::insert)
+                .then();
+    }
+
+    @Override
+    public Mono<PersonResponse> update(UpdatePersonRequest request) {
+        return personRepository.update(request, OffsetDateTime.now())
+                .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.INVALID_PERSON, "Invalid person id " + request.getId())))
+                .map(personMapper::map);
+    }
+
+    @Override
+    public Mono<Void> delete(Long id) {
+        return personRepository.delete(id)
+                .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.INVALID_PERSON, "Invalid person id " + id)))
                 .then();
     }
 

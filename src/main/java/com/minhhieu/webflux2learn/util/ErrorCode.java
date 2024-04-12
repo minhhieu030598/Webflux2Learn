@@ -46,6 +46,9 @@ public class ErrorCode {
     public static final BusinessErrorCode INVALID_BODY =
             new BusinessErrorCode(4044, "Invalid body", 400);
 
+    public static final BusinessErrorCode INVALID_PERSON =
+            new BusinessErrorCode(4045, "Invalid person", 400);
+
 
     static {
         Set<Integer> codes = new HashSet<>();

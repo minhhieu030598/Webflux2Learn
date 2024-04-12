@@ -22,6 +22,8 @@ public class HttpRouter {
                         accept(APPLICATION_JSON), builder1 -> builder1
                                 .GET(personHandler::getPersons)
                                 .POST(personHandler::create)
+                                .PUT("/{id}", personHandler::update)
+                                .DELETE("/{id}", personHandler::delete)
                 ))
                 .build();
     }

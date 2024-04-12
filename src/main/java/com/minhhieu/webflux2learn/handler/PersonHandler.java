@@ -3,6 +3,7 @@ package com.minhhieu.webflux2learn.handler;
 import com.minhhieu.webflux2learn.exception.BusinessException;
 import com.minhhieu.webflux2learn.model.filter.PersonFilter;
 import com.minhhieu.webflux2learn.model.request.CreatePersonRequest;
+import com.minhhieu.webflux2learn.model.request.UpdatePersonRequest;
 import com.minhhieu.webflux2learn.service.PersonService;
 import com.minhhieu.webflux2learn.util.ErrorCode;
 import com.minhhieu.webflux2learn.util.Response;
@@ -39,6 +40,22 @@ public class PersonHandler {
                 .flatMap(validator::validate)
                 .flatMap(personValidator::validate)
                 .flatMap(personService::create)
+                .then(Response.ok());
+    }
+
+    public Mono<ServerResponse> update(ServerRequest serverRequest) {
+        long id = Long.parseLong(serverRequest.pathVariable("id"));
+        return serverRequest.bodyToMono(UpdatePersonRequest.class)
+                .map(it -> it.setId(id))
+                .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.INVALID_BODY, "Body is null")))
+                .flatMap(validator::validate)
+                .flatMap(personService::update)
+                .flatMap(Response::ok);
+    }
+
+    public Mono<ServerResponse> delete(ServerRequest serverRequest) {
+        long id = Long.parseLong(serverRequest.pathVariable("id"));
+        return personService.delete(id)
                 .then(Response.ok());
     }
 }
