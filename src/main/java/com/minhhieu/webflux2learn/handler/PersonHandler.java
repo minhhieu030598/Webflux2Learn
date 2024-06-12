@@ -1,10 +1,12 @@
 package com.minhhieu.webflux2learn.handler;
 
+import com.minhhieu.webflux2learn.annotation.Permission;
 import com.minhhieu.webflux2learn.exception.BusinessException;
 import com.minhhieu.webflux2learn.model.filter.PersonFilter;
 import com.minhhieu.webflux2learn.model.request.CreatePersonRequest;
 import com.minhhieu.webflux2learn.model.request.UpdatePersonRequest;
 import com.minhhieu.webflux2learn.service.PersonService;
+import com.minhhieu.webflux2learn.util.Constant;
 import com.minhhieu.webflux2learn.util.ErrorCode;
 import com.minhhieu.webflux2learn.util.Response;
 import com.minhhieu.webflux2learn.validator.PersonValidator;
@@ -33,6 +35,18 @@ public class PersonHandler {
         return personService.getPersons(PersonFilter.of(request), PageRequest.of(page, size))
                 .flatMap(Response::ok);
     }
+
+    // We only set the annotation here, because it will trigger when route layer calls to handle layer
+    @Permission(subject = Constant.CREATE_PERSON, action = "#request.status", object = "#request.name")
+    public Mono<ServerResponse> activeAnnotation(ServerRequest serverRequest) {
+        return serverRequest.bodyToMono(CreatePersonRequest.class)
+                .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.INVALID_BODY, "Body is null")))
+                .flatMap(validator::validate)
+                .flatMap(personValidator::validate)
+                .flatMap(personService::create)
+                .then(Response.ok());
+    }
+
 
     public Mono<ServerResponse> create(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreatePersonRequest.class)
