@@ -37,7 +37,7 @@ public class PersonHandler {
     }
 
     // We only set the annotation here, because it will trigger when route layer calls to handle layer
-    @Permission(subject = Constant.CREATE_PERSON, action = "#request.status", object = "#request.name")
+//    @Permission(subject = Constant.CREATE_PERSON, action = "#request.status", object = "#request.name")
     public Mono<ServerResponse> activeAnnotation(ServerRequest serverRequest) {
         return serverRequest.bodyToMono(CreatePersonRequest.class)
                 .switchIfEmpty(Mono.error(new BusinessException(ErrorCode.INVALID_BODY, "Body is null")))

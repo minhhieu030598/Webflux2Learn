@@ -16,14 +16,14 @@ import java.lang.reflect.Method;
 @Component
 @Log4j2
 public class PermissionAspect {
+    private final ExpressionParser parser = new SpelExpressionParser();
 
     @Before("@annotation(permission)")
     public void checkPermission(JoinPoint joinPoint, Permission permission) {
+        // get signature of method (param types, param values, number of params...)
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+        // Get method info like return data type, method name,...
 //        Method method = signature.getMethod();
-
-        // Create a SpEL parser
-        ExpressionParser parser = new SpelExpressionParser();
 
         // Create an evaluation context and add method arguments to it
         StandardEvaluationContext context = new StandardEvaluationContext();
@@ -34,14 +34,21 @@ public class PermissionAspect {
         }
 
         // Evaluate the SpEL expression
-        String subject = permission.subject();
-        if (subject.startsWith("#")) {
-            var subjectValue = parser.parseExpression(subject).getValue(context, String.class);
-            log.info("subjectValue 0 ===== {}", subjectValue);
-        } else {
-            log.info("subjectValue 1 ===== {}", subject);
-        }
+        String subject = evaluate(context, permission.subject());
+        String action = evaluate(context, permission.action());
+        String object = evaluate(context, permission.object());
+        log.info("subjectValue: {}, actionValue: {}, objectValue: {}", subject, action, object);
 
+        // TODO: Auth logic
+        // if it is invalid -> throw a Exception
+
+    }
+
+    private String evaluate(StandardEvaluationContext context, String expression) {
+        if (!expression.startsWith("#")) {
+            return expression;
+        }
+        return parser.parseExpression(expression).getValue(context, String.class);
     }
 
 }

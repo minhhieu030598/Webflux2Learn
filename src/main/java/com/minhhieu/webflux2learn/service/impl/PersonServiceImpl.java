@@ -2,6 +2,7 @@ package com.minhhieu.webflux2learn.service.impl;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.map.IMap;
+import com.minhhieu.webflux2learn.annotation.Permission;
 import com.minhhieu.webflux2learn.exception.BusinessException;
 import com.minhhieu.webflux2learn.mapper.PersonMapper;
 import com.minhhieu.webflux2learn.model.Person;
@@ -12,6 +13,7 @@ import com.minhhieu.webflux2learn.model.response.PersonResponse;
 import com.minhhieu.webflux2learn.notifier.PersonNotifier;
 import com.minhhieu.webflux2learn.repository.PersonRepository;
 import com.minhhieu.webflux2learn.service.internal.PersonServiceInternal;
+import com.minhhieu.webflux2learn.util.Constant;
 import com.minhhieu.webflux2learn.util.ErrorCode;
 import com.minhhieu.webflux2learn.util.Filters;
 import lombok.extern.log4j.Log4j2;
@@ -60,6 +62,7 @@ public class PersonServiceImpl implements PersonServiceInternal {
     }
 
     @Override
+    @Permission(subject = Constant.CREATE_PERSON, action = "#request.status", object = "#request.name")
     public Mono<Void> create(CreatePersonRequest request) {
         return personRepository.nextId()
                 .map(id -> personMapper.map(id, request, OffsetDateTime.now()))
